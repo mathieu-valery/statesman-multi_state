@@ -64,6 +64,12 @@ module Statesman
               Hash[self.class.#{field_name}_human_wrapper]
                 .invert[#{field_name}_current_state]
             end
+
+            private
+
+            def #{field_name}
+              #{field_name}_current_state
+            end
           CODE
 
           include(const_set("#{field_name}#{SecureRandom.hex(4)}_mod".classify, Module.new).tap do |mod|
@@ -88,7 +94,7 @@ module Statesman
                     if #{field_name}_can_transition_to?(#{virtual_attribute_name})
                       @registered_callbacks << -> { #{field_name}_transition_to(#{virtual_attribute_name}, **options) }
                     else
-                      errors.add(:#{virtual_attribute_name}, :invalid_transition, message: "cannot transition to \#{#{virtual_attribute_name}}")
+                      errors.add(:#{field_name}, :invalid_transition, message: "cannot transition to \#{#{virtual_attribute_name}}")
                       return false
                     end
                   end
