@@ -10,28 +10,28 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema[8.0].define(version: 2023_10_04_142606) do
+ActiveRecord::Schema[8.1].define(version: 2023_10_04_142606) do
   create_table "admin_status_order_transitions", force: :cascade do |t|
-    t.string "to_state", null: false
+    t.datetime "created_at", null: false
     t.string "from_state"
     t.text "metadata", default: "{}"
-    t.integer "sort_key", null: false
-    t.integer "order_id", null: false
     t.boolean "most_recent", null: false
-    t.datetime "created_at", null: false
+    t.integer "order_id", null: false
+    t.integer "sort_key", null: false
+    t.string "to_state", null: false
     t.datetime "updated_at", null: false
     t.index ["order_id", "most_recent"], name: "index_admin_status_order_transitions_parent_most_recent", unique: true, where: "most_recent"
     t.index ["order_id", "sort_key"], name: "index_admin_status_order_transitions_parent_sort", unique: true
   end
 
   create_table "foreign_key_status_order_transitions", force: :cascade do |t|
-    t.string "to_state", null: false
+    t.datetime "created_at", null: false
+    t.integer "custom_fk_id", null: false
     t.string "from_state"
     t.text "metadata", default: "{}"
-    t.integer "sort_key", null: false
-    t.integer "custom_fk_id", null: false
     t.boolean "most_recent", null: false
-    t.datetime "created_at", null: false
+    t.integer "sort_key", null: false
+    t.string "to_state", null: false
     t.datetime "updated_at", null: false
     t.index ["custom_fk_id", "most_recent"], name: "index_foreign_key_status_order_transitions_parent_most_recent", unique: true, where: "most_recent"
     t.index ["custom_fk_id", "sort_key"], name: "index_foreign_key_status_order_transitions_parent_sort", unique: true
@@ -43,13 +43,13 @@ ActiveRecord::Schema[8.0].define(version: 2023_10_04_142606) do
   end
 
   create_table "user_status_order_transitions", force: :cascade do |t|
-    t.string "to_state", null: false
+    t.datetime "created_at", null: false
     t.string "from_state"
     t.text "metadata", default: "{}"
-    t.integer "sort_key", null: false
-    t.integer "order_id", null: false
     t.boolean "most_recent", null: false
-    t.datetime "created_at", null: false
+    t.integer "order_id", null: false
+    t.integer "sort_key", null: false
+    t.string "to_state", null: false
     t.datetime "updated_at", null: false
     t.index ["order_id", "most_recent"], name: "index_user_status_order_transitions_parent_most_recent", unique: true, where: "most_recent"
     t.index ["order_id", "sort_key"], name: "index_user_status_order_transitions_parent_sort", unique: true
