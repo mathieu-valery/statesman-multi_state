@@ -84,17 +84,28 @@ module Statesman
               class_eval <<~METHOD, __FILE__, __LINE__ + 1
                 def save_with_state(**options)
                   @registered_callbacks ||= []
-                  if #{virtual_attribute_name}_changed? && #{field_name}_can_transition_to?(#{virtual_attribute_name})
-                    @registered_callbacks << -> { #{field_name}_transition_to(#{virtual_attribute_name}, **options) }
+                  if #{virtual_attribute_name}_changed?
+                    if #{field_name}_can_transition_to?(#{virtual_attribute_name})
+                      @registered_callbacks << -> { #{field_name}_transition_to(#{virtual_attribute_name}, **options) }
+                    else
+                      errors.add(:#{field_name}, :invalid_transition, message: "cannot transition to \#{#{virtual_attribute_name}}")
+                      return false
+                    end
                   end
 
                   if defined?(super)
                     super
                   else
-                    save.tap do
-                      @registered_callbacks.each(&:call)
-                      @registered_callbacks = []
+                    return false unless save
+
+                    success = @registered_callbacks.all?(&:call)
+                    @registered_callbacks = []
+
+                    unless success
+                      errors.add(:#{field_name}, :transition_failed, message: "failed to transition to \#{#{virtual_attribute_name}}")
                     end
+
+                    success
                   end
                 end
               METHOD
