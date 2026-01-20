@@ -80,7 +80,7 @@ module Statesman
         order.user_status_state_form = 'invalid_state'
         assert_equal false, order.save_with_state
         assert order.errors.any?, 'Expected errors to be present'
-        assert_includes order.errors.full_messages, 'User status cannot transition to invalid_state'
+        assert_includes order.errors.full_messages, 'User status cannot transition from user_pending to invalid_state'
       end
 
       test 'sets an Reflection::HasOneStateMachineReflection and yield it to a block if given' do

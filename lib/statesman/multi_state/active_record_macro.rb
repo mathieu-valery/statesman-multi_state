@@ -94,7 +94,7 @@ module Statesman
                     if #{field_name}_can_transition_to?(#{virtual_attribute_name})
                       @registered_callbacks << -> { #{field_name}_transition_to(#{virtual_attribute_name}, **options) }
                     else
-                      errors.add(:#{field_name}, :invalid_transition, message: "cannot transition to \#{#{virtual_attribute_name}}")
+                      errors.add(:#{field_name}, :invalid_transition, message: "cannot transition from \#{#{field_name}} to \#{#{virtual_attribute_name}}")
                       return false
                     end
                   end
