@@ -65,8 +65,6 @@ module Statesman
                 .invert[#{field_name}_current_state]
             end
 
-            private
-
             def #{field_name}
               #{field_name}_current_state
             end
