@@ -97,6 +97,34 @@ module Statesman
         assert_equal :validated, order.admin_status_current_state.to_sym
       end
 
+      test 'creates initial transition for persisted record in writing role' do
+        order = Order.create!
+        assert_equal 0, UserStatusOrderTransition.count
+
+        order.user_status_current_state
+
+        assert_equal 1, UserStatusOrderTransition.count
+      end
+
+      test 'does not create initial transition when connection is in reading role' do
+        order = Order.create!
+        assert_equal 0, UserStatusOrderTransition.count
+
+        unless Order.respond_to?(:current_role) && ::ActiveRecord.respond_to?(:reading_role)
+          skip 'ActiveRecord role APIs not available'
+        end
+
+        original = Order.method(:current_role)
+        Order.define_singleton_method(:current_role) { ::ActiveRecord.reading_role }
+        begin
+          order.user_status_current_state
+        ensure
+          Order.define_singleton_method(:current_role, &original)
+        end
+
+        assert_equal 0, UserStatusOrderTransition.count
+      end
+
       test 'sets an Reflection::HasOneStateMachineReflection and yield it to a block if given' do
         result = nil
         klass = build_ar_klass

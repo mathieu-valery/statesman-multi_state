@@ -6,6 +6,9 @@ and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
 
+## [0.2.9] - 2026-02-06
+  - Avoid creating initial transitions when connected to a replica (ActiveRecord `reading_role`).
+
 ## [0.2.8] - 2026-02-06
   - Reset memoized state machines on `reload` so `current_state` is not stale after
     concurrent updates.
