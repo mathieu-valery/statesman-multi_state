@@ -59,7 +59,8 @@ module Statesman
             end
 
             def #{virtual_attribute_name}
-              super() || #{field_name}_current_state
+              value = read_attribute("#{virtual_attribute_name}")
+              value.nil? ? #{field_name}_current_state : value
             end
 
             def #{field_name}_current_state_human
