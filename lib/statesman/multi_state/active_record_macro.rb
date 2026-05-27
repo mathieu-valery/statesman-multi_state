@@ -66,11 +66,20 @@ module Statesman
               Hash[self.class.#{field_name}_human_wrapper]
                 .invert[#{field_name}_current_state]
             end
-
-            def #{field_name}
-              #{field_name}_current_state
-            end
           CODE
+
+          # Define a public reader so form helpers, serializers, and other
+          # callers that use `public_send(field_name)` work. Guard against
+          # clobbering an existing column reader or user-defined method with
+          # the same name as `field_name`.
+          unless method_defined?(field_name) || private_method_defined?(field_name) ||
+                 (respond_to?(:column_names) && column_names.include?(field_name.to_s))
+            generated_association_methods.class_eval <<~READER, __FILE__, __LINE__ + 1
+              def #{field_name}
+                #{field_name}_current_state
+              end
+            READER
+          end
 
           include(const_set("#{field_name}#{SecureRandom.hex(4)}_mod".classify, Module.new).tap do |mod|
             mod.module_eval do
@@ -94,7 +103,12 @@ module Statesman
                     if #{field_name}_can_transition_to?(#{virtual_attribute_name})
                       @registered_callbacks << -> { #{field_name}_transition_to(#{virtual_attribute_name}, **options) }
                     else
-                      errors.add(:#{field_name}, :invalid_transition, message: "cannot transition from \#{#{field_name}} to \#{#{virtual_attribute_name}}")
+                      errors.add(
+                        :#{field_name},
+                        :invalid_transition,
+                        current_state: #{field_name}_current_state_human,
+                        target_state: I18n.t(#{virtual_attribute_name}, scope: "statesman.#{field_name}_#{base_klass.underscore}", default: #{virtual_attribute_name}.to_s)
+                      )
                       return false
                     end
                   end
