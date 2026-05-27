@@ -72,8 +72,9 @@ module Statesman
           # callers that use `public_send(field_name)` work. Guard against
           # clobbering an existing column reader or user-defined method with
           # the same name as `field_name`.
-          has_column_reader = if respond_to?(:column_names) &&
-                                 (name.present? || (instance_variable_defined?(:@table_name) && @table_name.present?))
+          table_name_available = name.present? || (instance_variable_defined?(:@table_name) && @table_name.present?)
+          has_column_reader = if respond_to?(:column_names) && table_name_available &&
+                                 respond_to?(:table_exists?) && table_exists?
                                 column_names.include?(field_name.to_s)
                               else
                                 false
