@@ -103,7 +103,6 @@ module Statesman
         refute order.save_with_state
 
         error = order.errors.find { |e| e.attribute == :user_status }
-        binding.irb
         assert_equal 'Processed', error.options[:current_state]
         assert_equal 'User Pending', error.options[:target_state]
       end
