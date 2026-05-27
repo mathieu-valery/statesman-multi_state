@@ -50,7 +50,9 @@ module Statesman
 
               if #{initial_transition}
                 if @#{state_machine_name}.history.empty? && #{state_machine_klass}.initial_state
-                  @#{state_machine_name}.instance_variable_get(:@storage_adapter).create(nil, #{state_machine_klass}.initial_state) if @#{state_machine_name}.object.persisted?
+                  if @#{state_machine_name}.object.persisted? && self.class.current_role != ::ActiveRecord.reading_role
+                    @#{state_machine_name}.instance_variable_get(:@storage_adapter).create(nil, #{state_machine_klass}.initial_state)
+                  end
                 end
               end
               @#{state_machine_name}

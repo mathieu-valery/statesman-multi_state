@@ -5,6 +5,18 @@ The format is based on [Keep a Changelog](http://keepachangelog.com/)
 and this project adheres to [Semantic Versioning](http://semver.org/).
 
 ## [Unreleased]
+
+## [0.2.9] - 2026-02-06
+  - Avoid creating initial transitions when connected to a replica (ActiveRecord `reading_role`).
+
+## [0.2.8] - 2026-02-06
+  - Reset memoized state machines on `reload` so `current_state` is not stale after
+    concurrent updates.
+
+## [0.2.7] - 2026-01-21
+  - Fix `save_with_state` false negative always returning true even when the
+    transition is invalid.
+
 ## [0.2.6] - 2025-09-03
   - Fix `initial_transition` issue when the associated model is not yet
     persisted in the database, and calls the state machine in a `validate`

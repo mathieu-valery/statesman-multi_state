@@ -93,6 +93,56 @@ module Statesman
         assert_equal current_state, order.user_status_current_state
       end
 
+      test 'reload resets state machines so current_state reflects DB changes from another instance' do
+        order = Order.create!
+
+        # Prime memoized state machine instances (they persist across `reload`)
+        assert_equal :user_pending, order.user_status_current_state.to_sym
+        assert_equal :admin_pending, order.admin_status_current_state.to_sym
+
+        # Load a separate instance for the same DB row to simulate a concurrent updater
+        other = Order.find(order.id)
+        other.user_status_transition_to!(:processed)
+        other.admin_status_transition_to!(:validated)
+
+        # Prove the cache is stale without an explicit reset
+        assert_equal :user_pending, order.user_status_current_state.to_sym
+        assert_equal :admin_pending, order.admin_status_current_state.to_sym
+
+        order.reload
+
+        assert_equal :processed, order.user_status_current_state.to_sym
+        assert_equal :validated, order.admin_status_current_state.to_sym
+      end
+
+      test 'creates initial transition for persisted record in writing role' do
+        order = Order.create!
+        assert_equal 0, UserStatusOrderTransition.count
+
+        order.user_status_current_state
+
+        assert_equal 1, UserStatusOrderTransition.count
+      end
+
+      test 'does not create initial transition when connection is in reading role' do
+        order = Order.create!
+        assert_equal 0, UserStatusOrderTransition.count
+
+        unless Order.respond_to?(:current_role) && ::ActiveRecord.respond_to?(:reading_role)
+          skip 'ActiveRecord role APIs not available'
+        end
+
+        original = Order.method(:current_role)
+        Order.define_singleton_method(:current_role) { ::ActiveRecord.reading_role }
+        begin
+          order.user_status_current_state
+        ensure
+          Order.define_singleton_method(:current_role, &original)
+        end
+
+        assert_equal 0, UserStatusOrderTransition.count
+      end
+
       test 'sets an Reflection::HasOneStateMachineReflection and yield it to a block if given' do
         result = nil
         klass = build_ar_klass
